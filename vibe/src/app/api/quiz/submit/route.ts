@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     where: { id: session.user.id },
     data: {
       archetype: archetype.id,
-      traitScores,
+      traitScores: traitScores as unknown as Record<string, number>,
       quizCompletedAt: new Date(),
       quizUpdatedAt: new Date(),
     },

@@ -77,7 +77,7 @@ export async function POST(
     ];
     for (const key of keys) {
       const sum = membersWithScores.reduce(
-        (acc, m) => acc + ((m.user.traitScores as TraitScores)[key] ?? 0),
+        (acc, m) => acc + ((m.user.traitScores as unknown as TraitScores)[key] ?? 0),
         0
       );
       avgTraits[key] = Math.round(sum / membersWithScores.length);
