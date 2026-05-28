@@ -1,7 +1,5 @@
 import OpenAI from "openai";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
 export interface AIRecommendation {
   title: string;
   description: string;
@@ -23,6 +21,7 @@ interface GroupProfile {
 export async function getGroupRecommendations(
   profile: GroupProfile
 ): Promise<AIRecommendation[]> {
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   const prompt = `You are a fun, enthusiastic activity planner. Given this friend group's profile, suggest 5 activities they'd all enjoy.
 
 GROUP PROFILE:
