@@ -3,7 +3,7 @@ import { TraitScores } from "./types";
 export interface Archetype {
   id: string;
   name: string;
-  emoji: string;
+  icon: string; // Lucide icon name
   tagline: string;
   description: string;
   color: string;
@@ -15,7 +15,7 @@ export const archetypes: Archetype[] = [
   {
     id: "explorer",
     name: "The Explorer",
-    emoji: "🧭",
+    icon: "Compass",
     tagline: "Always chasing the next horizon",
     description:
       "You thrive on new experiences. First to suggest a road trip, last to say no to an adventure.",
@@ -26,7 +26,7 @@ export const archetypes: Archetype[] = [
   {
     id: "couch-king",
     name: "The Couch King",
-    emoji: "👑",
+    icon: "Crown",
     tagline: "Comfort is a lifestyle choice",
     description:
       "Netflix, snacks, and good company. You bring the chill energy every group needs.",
@@ -37,7 +37,7 @@ export const archetypes: Archetype[] = [
   {
     id: "adrenaline-junkie",
     name: "The Adrenaline Junkie",
-    emoji: "⚡",
+    icon: "Zap",
     tagline: "If it's not intense, it's not interesting",
     description:
       "Go-karts, escape rooms, competitive anything. You turn every outing into an event.",
@@ -48,7 +48,7 @@ export const archetypes: Archetype[] = [
   {
     id: "social-butterfly",
     name: "The Social Butterfly",
-    emoji: "🦋",
+    icon: "Users",
     tagline: "Knows everyone, connects everyone",
     description:
       "You're the reason the group exists. You plan, you invite, you make it happen.",
@@ -59,7 +59,7 @@ export const archetypes: Archetype[] = [
   {
     id: "creative-soul",
     name: "The Creative Soul",
-    emoji: "🎨",
+    icon: "Palette",
     tagline: "Sees beauty in the unexpected",
     description:
       "Museums, hidden cafes, art walks. You find the experiences nobody else would think of.",
@@ -70,7 +70,7 @@ export const archetypes: Archetype[] = [
   {
     id: "foodie-king",
     name: "The Foodie",
-    emoji: "🍜",
+    icon: "UtensilsCrossed",
     tagline: "Plans the day around meals",
     description:
       "You've already picked the restaurant. And the backup restaurant. And dessert.",

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
@@ -8,6 +9,11 @@ import MemberList from "@/components/MemberList";
 import CompatibilityScore from "@/components/CompatibilityScore";
 import PersonalityRadar from "@/components/PersonalityRadar";
 import GlowCard from "@/components/GlowCard";
+import PageWrapper from "@/components/PageWrapper";
+
+export const metadata: Metadata = {
+  title: "Group — PlanPal",
+};
 import CopyInviteButton from "./CopyInviteButton";
 
 export default async function GroupDetailPage({

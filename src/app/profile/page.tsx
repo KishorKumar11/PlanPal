@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
@@ -8,6 +9,11 @@ import Navbar from "@/components/Navbar";
 import ArchetypeCard from "@/components/ArchetypeCard";
 import PersonalityRadar from "@/components/PersonalityRadar";
 import EditInterests from "./EditInterests";
+import PageWrapper from "@/components/PageWrapper";
+
+export const metadata: Metadata = {
+  title: "Profile — PlanPal",
+};
 
 export default async function ProfilePage() {
   const session = await auth();

@@ -20,7 +20,7 @@ Stop arguing about what to do. PlanPal analyses everyone's personalities and fin
 | Auth | NextAuth.js v5 (Google OAuth, JWT sessions) |
 | Database | PostgreSQL via Supabase |
 | ORM | Prisma v7 (pg adapter) |
-| AI | Anthropic Claude (claude-opus-4-5) with prompt caching |
+| AI | Groq (llama-3.3-70b-versatile) via OpenAI-compatible API |
 | Animations | Framer Motion |
 | Charts | Recharts |
 | Deploy | Vercel |
@@ -32,7 +32,7 @@ Stop arguing about what to do. PlanPal analyses everyone's personalities and fin
 - Node.js 20+
 - PostgreSQL (local or Supabase)
 - Google OAuth credentials
-- Anthropic API key
+- Groq API key (free at console.groq.com)
 
 ### Setup
 
@@ -65,7 +65,7 @@ AUTH_SECRET=your-random-32-char-secret
 NEXTAUTH_SECRET=your-random-32-char-secret
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
-ANTHROPIC_API_KEY=sk-ant-your-key
+GROQ_API_KEY=gsk_your-groq-api-key
 ```
 
 Generate `AUTH_SECRET` / `NEXTAUTH_SECRET`:
@@ -119,3 +119,33 @@ Responses include `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `Retry-After
 Deployed on Vercel. Root directory: `planpal/`. Build command: `prisma generate && next build`.
 
 Set these environment variables in Vercel → Settings → Environment Variables (same as `.env.example` but with real values).
+
+---
+
+## Future Plans
+
+PlanPal is designed to grow into a full end-to-end group planning platform. Here's the roadmap:
+
+### Budget Planner
+Split costs fairly across the group before you commit to a plan. Set a per-person budget and filter AI recommendations to only show options within range. Track who owes what after the activity.
+
+### Cost Tracker
+After an activity, log what everyone spent. PlanPal calculates the balance automatically and shows a simple "who pays whom" summary — like Splitwise, but built into your plan.
+
+### Find Best Prices
+PlanPal searches multiple booking and review platforms (Google, Yelp, TripAdvisor, Eventbrite) to surface the best price for each recommended activity. No more 12 browser tabs.
+
+### Build Packages
+Combine multiple activities into a full-day or weekend itinerary package. AI sequences them logically (brunch → afternoon activity → dinner) with travel time estimates between stops.
+
+### Find Package Costs
+Get a total cost estimate for a multi-activity package — including venue prices, transport, and optional extras — so the group knows the full spend before committing.
+
+### One-Stop Payment
+Connect directly with venue booking APIs (OpenTable, Eventbrite, Airbnb Experiences, etc.) so the group can reserve and pay for everything inside PlanPal. No jumping between apps, no "can someone book this?" back-and-forth.
+
+### Vendor Network
+A curated marketplace of local vendors — restaurants, activity operators, experience providers — who offer group packages and exclusive discounts to PlanPal users.
+
+### Smart Notifications
+Remind members to vote, alert the group when a recommendation sells out, and send a "time to plan again" nudge when the group hasn't met in a while.
