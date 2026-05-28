@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 
 export interface AIRecommendation {
   title: string;
@@ -18,8 +18,6 @@ interface GroupProfile {
   avgTraits: Record<string, number>;
 }
 
-// Static system prompt — will be cached by Anthropic on the first call
-// and served from cache on subsequent calls (saves ~90% of input token cost)
 const SYSTEM_PROMPT = `You are PlanPal's AI activity planner — fun, enthusiastic, and laser-focused on group compatibility.
 
 Your job: given a friend group's personality profile, suggest exactly 5 activities they'd ALL genuinely enjoy together.
@@ -39,7 +37,11 @@ Rules:
 export async function getGroupRecommendations(
   profile: GroupProfile
 ): Promise<AIRecommendation[]> {
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  // Groq uses the OpenAI-compatible API — no extra package needed
+  const client = new OpenAI({
+    apiKey: process.env.GROQ_API_KEY,
+    baseURL: "https://api.groq.com/openai/v1",
+  });
 
   const userPrompt = `GROUP PROFILE:
 - Members: ${profile.memberCount}
@@ -50,29 +52,22 @@ export async function getGroupRecommendations(
 
 Suggest 5 activities for this group. Return JSON array only.`;
 
-  const message = await client.messages.create({
-    model: "claude-opus-4-5",
-    max_tokens: 1500,
-    // Cache the static system prompt — charged at 10% of normal input token price
-    // after the first request. Cache lifetime: 5 minutes (extended by each use).
-    system: [
-      {
-        type: "text",
-        text: SYSTEM_PROMPT,
-        cache_control: { type: "ephemeral" },
-      },
+  const response = await client.chat.completions.create({
+    model: "llama-3.3-70b-versatile",
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: userPrompt },
     ],
-    messages: [{ role: "user", content: userPrompt }],
+    temperature: 0.8,
+    max_tokens: 1500,
   });
 
-  const text =
-    message.content[0].type === "text" ? message.content[0].text : "[]";
+  const text = response.choices[0]?.message?.content ?? "[]";
   const cleaned = text.replace(/```json|```/g, "").trim();
 
   try {
     return JSON.parse(cleaned) as AIRecommendation[];
   } catch {
-    // If Claude returns malformed JSON, return empty so the route can handle it
     return [];
   }
 }
