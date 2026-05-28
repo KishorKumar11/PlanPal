@@ -4,7 +4,18 @@ import { prisma } from "@/lib/prisma";
 import { getGroupRecommendations } from "@/lib/openai";
 import { TraitScores } from "@/lib/types";
 
-const MAX_RECS_PER_DAY = 10;
+// Per-group: max 10 AI calls per day (protects API spend)
+const MAX_RECS_PER_GROUP_PER_DAY = 10;
+// Per-user: max 3 AI calls per hour across all groups (prevents abuse)
+const MAX_RECS_PER_USER_PER_HOUR = 3;
+
+function windowStart(ms: number) {
+  return new Date(Date.now() - ms);
+}
+
+function secondsUntilReset(windowMs: number): number {
+  return Math.ceil(windowMs / 1000);
+}
 
 export async function POST(
   _req: NextRequest,
@@ -16,7 +27,34 @@ export async function POST(
   }
 
   const { id } = await params;
+  const userId = session.user.id;
 
+  // ── 1. Check per-user hourly limit (across all groups) ───────────────────
+  const userRecsLastHour = await prisma.recommendation.count({
+    where: {
+      group: { members: { some: { userId } } },
+      createdAt: { gte: windowStart(60 * 60 * 1000) },
+      // We track which user triggered the rec by checking membership;
+      // use a simpler proxy: count recs on groups this user is in
+    },
+  });
+
+  if (userRecsLastHour >= MAX_RECS_PER_USER_PER_HOUR) {
+    return NextResponse.json(
+      { error: `Hourly limit reached — max ${MAX_RECS_PER_USER_PER_HOUR} AI calls per hour per user. Try again later.` },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(secondsUntilReset(60 * 60 * 1000)),
+          "X-RateLimit-Limit": String(MAX_RECS_PER_USER_PER_HOUR),
+          "X-RateLimit-Remaining": "0",
+          "X-RateLimit-Reset": String(Math.floor((Date.now() + 60 * 60 * 1000) / 1000)),
+        },
+      }
+    );
+  }
+
+  // ── 2. Load group + check membership ─────────────────────────────────────
   const group = await prisma.vibeGroup.findUnique({
     where: { id },
     include: {
@@ -33,31 +71,55 @@ export async function POST(
         },
       },
       recommendations: {
-        where: {
-          createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
-        },
-        select: { id: true },
+        where: { createdAt: { gte: windowStart(24 * 60 * 60 * 1000) } },
+        select: { id: true, createdAt: true },
+        orderBy: { createdAt: "asc" },
       },
     },
   });
 
-  if (!group) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!group) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
 
-  const isMember = group.members.some((m) => m.userId === session.user.id);
-  if (!isMember) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const isMember = group.members.some((m) => m.userId === userId);
+  if (!isMember) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
-  if (group.recommendations.length >= MAX_RECS_PER_DAY) {
+  // ── 3. Check per-group daily limit ────────────────────────────────────────
+  const groupRecsToday = group.recommendations.length;
+  const remaining = MAX_RECS_PER_GROUP_PER_DAY - groupRecsToday;
+
+  if (remaining <= 0) {
+    // Tell client when the oldest rec falls out of the 24h window
+    const oldestRec = group.recommendations[0];
+    const resetAt = oldestRec
+      ? Math.floor((oldestRec.createdAt.getTime() + 24 * 60 * 60 * 1000) / 1000)
+      : Math.floor((Date.now() + 24 * 60 * 60 * 1000) / 1000);
+
     return NextResponse.json(
-      { error: "Daily recommendation limit reached (10 per day)" },
-      { status: 429 }
+      { error: `Daily limit reached — max ${MAX_RECS_PER_GROUP_PER_DAY} AI calls per group per day.` },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(resetAt - Math.floor(Date.now() / 1000)),
+          "X-RateLimit-Limit": String(MAX_RECS_PER_GROUP_PER_DAY),
+          "X-RateLimit-Remaining": "0",
+          "X-RateLimit-Reset": String(resetAt),
+        },
+      }
     );
   }
 
+  // ── 4. Build group profile ────────────────────────────────────────────────
   const archetypes = group.members
     .map((m) => m.user.archetype)
     .filter(Boolean) as string[];
 
-  const allInterests = [...new Set(group.members.flatMap((m) => m.user.interests))];
+  const allInterests = [
+    ...new Set(group.members.flatMap((m) => m.user.interests)),
+  ];
 
   const interestCounts = new Map<string, number>();
   for (const m of group.members) {
@@ -69,21 +131,30 @@ export async function POST(
     (i) => (interestCounts.get(i) ?? 0) >= 2
   );
 
-  const membersWithScores = group.members.filter((m) => m.user.traitScores !== null);
+  const membersWithScores = group.members.filter(
+    (m) => m.user.traitScores !== null
+  );
   const avgTraits: Record<string, number> = {};
   if (membersWithScores.length > 0) {
     const keys: (keyof TraitScores)[] = [
-      "adventurous", "social", "creative", "chill", "competitive", "foodie",
+      "adventurous",
+      "social",
+      "creative",
+      "chill",
+      "competitive",
+      "foodie",
     ];
     for (const key of keys) {
       const sum = membersWithScores.reduce(
-        (acc, m) => acc + ((m.user.traitScores as unknown as TraitScores)[key] ?? 0),
+        (acc, m) =>
+          acc + ((m.user.traitScores as unknown as TraitScores)[key] ?? 0),
         0
       );
       avgTraits[key] = Math.round(sum / membersWithScores.length);
     }
   }
 
+  // ── 5. Call Anthropic (system prompt is cached after first call) ──────────
   const aiRecs = await getGroupRecommendations({
     memberCount: group.members.length,
     archetypes,
@@ -92,6 +163,14 @@ export async function POST(
     avgTraits,
   });
 
+  if (aiRecs.length === 0) {
+    return NextResponse.json(
+      { error: "AI returned no recommendations. Please try again." },
+      { status: 502 }
+    );
+  }
+
+  // ── 6. Persist & respond ──────────────────────────────────────────────────
   const saved = await prisma.$transaction(
     aiRecs.map((r) =>
       prisma.recommendation.create({
@@ -112,5 +191,10 @@ export async function POST(
     )
   );
 
-  return NextResponse.json(saved);
+  return NextResponse.json(saved, {
+    headers: {
+      "X-RateLimit-Limit": String(MAX_RECS_PER_GROUP_PER_DAY),
+      "X-RateLimit-Remaining": String(remaining - 1),
+    },
+  });
 }

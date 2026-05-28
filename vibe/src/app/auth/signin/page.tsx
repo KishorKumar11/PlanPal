@@ -8,7 +8,7 @@ export default function SignInPage() {
 
       <div className="relative w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="font-display text-5xl font-bold gradient-text mb-3">Vibe</h1>
+          <h1 className="font-display text-5xl font-bold gradient-text mb-3">PlanPal</h1>
           <p className="text-text-dim text-sm leading-relaxed">
             Find your archetype. Plan with friends.
           </p>
@@ -16,7 +16,7 @@ export default function SignInPage() {
 
         <GlowCard className="p-8">
           <h2 className="font-display text-xl font-bold text-text-bright text-center mb-2">
-            Sign in to Vibe
+            Sign in to PlanPal
           </h2>
           <p className="text-text-dim text-sm text-center mb-6">
             Discover your personality type and get AI-powered activity recommendations your whole group will love.

@@ -21,7 +21,7 @@ export default function Navbar({ user }: NavbarProps) {
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="font-display text-2xl font-bold gradient-text">
-            Vibe
+            PlanPal
           </Link>
 
           {user ? (

@@ -1,4 +1,4 @@
-import OpenAI from "openai";
+import Anthropic from "@anthropic-ai/sdk";
 
 export interface AIRecommendation {
   title: string;
@@ -18,38 +18,61 @@ interface GroupProfile {
   avgTraits: Record<string, number>;
 }
 
+// Static system prompt — will be cached by Anthropic on the first call
+// and served from cache on subsequent calls (saves ~90% of input token cost)
+const SYSTEM_PROMPT = `You are PlanPal's AI activity planner — fun, enthusiastic, and laser-focused on group compatibility.
+
+Your job: given a friend group's personality profile, suggest exactly 5 activities they'd ALL genuinely enjoy together.
+
+Rules:
+- Return ONLY a valid JSON array with exactly 5 objects. Zero extra text, zero markdown fences.
+- Each object must have these exact keys: title, description, category, reasoning, price_range, duration, energy_level
+- category must be one of: "activity", "restaurant", "trip"
+- price_range must be one of: "$", "$$", "$$$"
+- duration must be one of: "2 hours", "half day", "full day", "weekend"
+- energy_level must be one of: "low", "medium", "high"
+- Mix categories — don't return 5 activities of the same type
+- Tailor recommendations to the specific archetypes and shared interests provided
+- description: 2-3 sentences on why this is perfect for THIS group specifically
+- reasoning: 1 sentence linking to specific archetypes/interests from the profile`;
+
 export async function getGroupRecommendations(
   profile: GroupProfile
 ): Promise<AIRecommendation[]> {
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  const prompt = `You are a fun, enthusiastic activity planner. Given this friend group's profile, suggest 5 activities they'd all enjoy.
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-GROUP PROFILE:
-- ${profile.memberCount} members
-- Personality types: ${profile.archetypes.join(", ")}
-- Shared interests: ${profile.sharedInterests.join(", ")}
-- All interests: ${profile.allInterests.join(", ")}
-- Group traits (1-10): ${JSON.stringify(profile.avgTraits)}
+  const userPrompt = `GROUP PROFILE:
+- Members: ${profile.memberCount}
+- Personality archetypes: ${profile.archetypes.join(", ") || "unknown"}
+- Shared interests (everyone likes these): ${profile.sharedInterests.join(", ") || "none yet"}
+- All interests across the group: ${profile.allInterests.join(", ") || "none yet"}
+- Group trait scores (1-10 scale): ${JSON.stringify(profile.avgTraits)}
 
-Return ONLY a JSON array with exactly 5 objects. No other text:
-[{
-  "title": "Activity name",
-  "description": "2-3 sentence description of why this is perfect for the group",
-  "category": "activity" or "restaurant" or "trip",
-  "reasoning": "1 sentence explaining which personality types and interests this serves",
-  "price_range": "$" or "$$" or "$$$",
-  "duration": "2 hours" or "half day" or "full day" or "weekend",
-  "energy_level": "low" or "medium" or "high"
-}]`;
+Suggest 5 activities for this group. Return JSON array only.`;
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [{ role: "user", content: prompt }],
-    temperature: 0.8,
+  const message = await client.messages.create({
+    model: "claude-opus-4-5",
     max_tokens: 1500,
+    // Cache the static system prompt — charged at 10% of normal input token price
+    // after the first request. Cache lifetime: 5 minutes (extended by each use).
+    system: [
+      {
+        type: "text",
+        text: SYSTEM_PROMPT,
+        cache_control: { type: "ephemeral" },
+      },
+    ],
+    messages: [{ role: "user", content: userPrompt }],
   });
 
-  const text = response.choices[0]?.message?.content ?? "[]";
+  const text =
+    message.content[0].type === "text" ? message.content[0].text : "[]";
   const cleaned = text.replace(/```json|```/g, "").trim();
-  return JSON.parse(cleaned) as AIRecommendation[];
+
+  try {
+    return JSON.parse(cleaned) as AIRecommendation[];
+  } catch {
+    // If Claude returns malformed JSON, return empty so the route can handle it
+    return [];
+  }
 }

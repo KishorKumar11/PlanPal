@@ -45,13 +45,13 @@ export default async function LandingPage() {
             </div>
 
             <h1 className="font-display text-5xl sm:text-7xl font-bold leading-tight mb-6">
-              <span className="gradient-text">Find your vibe.</span>
+              <span className="gradient-text">Find your plan.</span>
               <br />
               <span className="text-text-bright">Plan with friends.</span>
             </h1>
 
             <p className="text-text-dim text-lg sm:text-xl leading-relaxed max-w-xl mx-auto mb-10">
-              Stop arguing about what to do. Vibe analyses everyone&apos;s personalities and finds activities your whole group will love.
+              Stop arguing about what to do. PlanPal analyses everyone&apos;s personalities and finds activities your whole group will love.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
