@@ -214,7 +214,7 @@ function MiniCard({ card, index }: { card: MockCard; index: number }) {
             animate={{ opacity: 1, height: "auto", marginTop: 8 }}
             exit={{ opacity: 0, height: 0, marginTop: 0 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
-            className="text-xs text-text-dim italic border-l-2 pl-3 overflow-hidden"
+            className="text-xs text-text-dim border-l-2 pl-3 overflow-hidden"
             style={{ borderColor: `${card.color}60` }}
           >
             {card.reasoning}

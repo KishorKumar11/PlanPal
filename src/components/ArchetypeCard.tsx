@@ -43,7 +43,7 @@ export default function ArchetypeCard({ archetype, compact = false }: ArchetypeC
       <h3 className="font-display text-xl font-bold mb-1" style={{ color: archetype.color }}>
         {archetype.name}
       </h3>
-      <p className="text-sm text-text-dim italic mb-2">{archetype.tagline}</p>
+      <p className="text-sm text-text-dim mb-2">{archetype.tagline}</p>
       <p className="text-sm text-text-bright/80 leading-relaxed">{archetype.description}</p>
     </motion.div>
   );

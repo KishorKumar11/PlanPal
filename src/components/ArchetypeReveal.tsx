@@ -48,7 +48,7 @@ export default function ArchetypeReveal({ archetype, traitScores }: ArchetypeRev
         <h2 className="font-display text-4xl font-bold mb-2" style={{ color: archetype.color }}>
           {archetype.name}
         </h2>
-        <p className="text-text-dim italic mb-4 text-lg">{archetype.tagline}</p>
+        <p className="text-text-dim mb-4 text-lg">{archetype.tagline}</p>
         <p className="text-text-bright/80 text-sm leading-relaxed mb-8 max-w-sm mx-auto">
           {archetype.description}
         </p>
