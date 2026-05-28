@@ -1,36 +1,121 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PlanPal — AI Group Activity Planner
 
-## Getting Started
+Stop arguing about what to do. PlanPal analyses everyone's personalities and finds activities your whole group will love.
 
-First, run the development server:
+## What it does
+
+1. **Personality quiz** — 10 questions that map you to one of 6 archetypes (The Adventurer, The Socialite, The Creative, etc.)
+2. **Interest selection** — pick from 26 interests across Outdoors, Food, Entertainment, Sports, Culture, and Travel
+3. **Groups** — create a group, share an invite link, friends join with one click
+4. **AI recommendations** — Claude analyses the group's combined archetypes, traits, and interests and suggests 5 activities everyone will enjoy
+5. **Voting** — members vote on recommendations; the group sees what wins
+
+## Tech stack
+
+| Layer | Choice |
+|-------|--------|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS v4 |
+| Auth | NextAuth.js v5 (Google OAuth, JWT sessions) |
+| Database | PostgreSQL via Supabase |
+| ORM | Prisma v7 (pg adapter) |
+| AI | Anthropic Claude (claude-opus-4-5) with prompt caching |
+| Animations | Framer Motion |
+| Charts | Recharts |
+| Deploy | Vercel |
+
+## Local development
+
+### Prerequisites
+
+- Node.js 20+
+- PostgreSQL (local or Supabase)
+- Google OAuth credentials
+- Anthropic API key
+
+### Setup
 
 ```bash
+# 1. Install dependencies
+cd planpal
+npm install
+
+# 2. Copy env template and fill in your values
+cp .env.example .env.local
+
+# 3. Generate Prisma client
+npx prisma generate
+
+# 4. Push schema to your database
+npx prisma db push
+
+# 5. Start dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+DATABASE_URL=postgresql://user:password@host:5432/planpal
+NEXTAUTH_URL=http://localhost:3000
+AUTH_SECRET=your-random-32-char-secret
+NEXTAUTH_SECRET=your-random-32-char-secret
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+ANTHROPIC_API_KEY=sk-ant-your-key
+```
 
-## Learn More
+Generate `AUTH_SECRET` / `NEXTAUTH_SECRET`:
+```bash
+openssl rand -base64 32
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Project structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+planpal/
+├── prisma/
+│   └── schema.prisma          # DB models: User, VibeGroup, GroupMember, Recommendation, Vote
+├── src/
+│   ├── app/
+│   │   ├── api/               # Route handlers
+│   │   │   ├── auth/          # NextAuth handler
+│   │   │   ├── groups/        # CRUD + join + AI recommend
+│   │   │   ├── interests/     # Save user interests
+│   │   │   ├── quiz/submit    # Save quiz results + compute archetype
+│   │   │   └── vote/          # Cast votes on recommendations
+│   │   ├── auth/              # Sign-in / error pages
+│   │   ├── dashboard/         # User's groups
+│   │   ├── group/[id]/        # Group detail, recommend, vote
+│   │   ├── join/[code]/       # Invite link landing page
+│   │   ├── onboarding/        # Quiz + interest selection
+│   │   └── profile/           # User profile + edit interests
+│   ├── components/            # Shared UI components
+│   └── lib/
+│       ├── auth.ts            # NextAuth config
+│       ├── archetypes.ts      # 6 archetypes + scoring
+│       ├── interests.ts       # 26 interests by category
+│       ├── openai.ts          # Anthropic AI client + prompt caching
+│       ├── prisma.ts          # Prisma singleton
+│       ├── quiz-data.ts       # 10 quiz questions + trait scoring
+│       ├── types.ts           # Shared TypeScript types
+│       └── validators.ts      # Zod schemas
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Rate limiting
 
-## Deploy on Vercel
+| Limit | Value | Scope |
+|-------|-------|-------|
+| AI recommendations | 10 / day | Per group |
+| AI recommendations | 3 / hour | Per user |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Responses include `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `Retry-After` headers.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deployment
+
+Deployed on Vercel. Root directory: `planpal/`. Build command: `prisma generate && next build`.
+
+Set these environment variables in Vercel → Settings → Environment Variables (same as `.env.example` but with real values).
