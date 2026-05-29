@@ -1,14 +1,14 @@
-# PlanPal — AI Group Activity Planner
+# PlanPal
 
 No more "what should we do?" back-and-forth. PlanPal analyses everyone's personalities and finds activities your whole group will love.
 
 ## What it does
 
-1. **Personality quiz** — 10 questions that map you to one of 6 archetypes (The Adventurer, The Socialite, The Creative, etc.)
-2. **Interest selection** — pick from 26 interests across Outdoors, Food, Entertainment, Sports, Culture, and Travel
-3. **Groups** — create a group, share an invite link, friends join with one click
-4. **AI recommendations** — Claude analyses the group's combined archetypes, traits, and interests and suggests 5 activities everyone will enjoy
-5. **Voting** — members vote on recommendations; the group sees what wins
+1. **Personality quiz**: 10 questions that map you to one of 6 archetypes (The Adventurer, The Socialite, The Creative, etc.)
+2. **Interest selection**: pick from 26 interests across Outdoors, Food, Entertainment, Sports, Culture, and Travel
+3. **Groups**: create a group, share an invite link, friends join with one click
+4. **AI recommendations**: Claude analyses the group's combined archetypes, traits, and interests and suggests 5 activities everyone will enjoy
+5. **Voting**: members vote on recommendations; the group sees what wins
 
 ## Tech stack
 
@@ -120,32 +120,28 @@ Deployed on Vercel. Root directory: `planpal/`. Build command: `prisma generate 
 
 Set these environment variables in Vercel → Settings → Environment Variables (same as `.env.example` but with real values).
 
----
+## What's coming
 
-## Future Plans
+### Budget planner
+Set a per-person budget before committing to anything. Recommendations filter to what the group can actually afford, and you can track who owes what afterwards.
 
-PlanPal is designed to grow into a full end-to-end group planning platform. Here's the roadmap:
+### Cost tracker
+Log what everyone spent after an activity. PlanPal works out the balance and shows a simple "who pays whom" split (like Splitwise, but inside your plan).
 
-### Budget Planner
-Split costs fairly across the group before you commit to a plan. Set a per-person budget and filter AI recommendations to only show options within range. Track who owes what after the activity.
+### Best price search
+Search across booking and review platforms (Google, Yelp, TripAdvisor, Eventbrite) to find the best price for each activity. No more 12 browser tabs.
 
-### Cost Tracker
-After an activity, log what everyone spent. PlanPal calculates the balance automatically and shows a simple "who pays whom" summary — like Splitwise, but built into your plan.
+### Day packages
+String multiple activities into a full-day or weekend itinerary. AI sequences them sensibly (brunch, afternoon activity, dinner) and estimates travel time between stops.
 
-### Find Best Prices
-PlanPal searches multiple booking and review platforms (Google, Yelp, TripAdvisor, Eventbrite) to surface the best price for each recommended activity. No more 12 browser tabs.
+### Package cost estimates
+Get a total spend estimate for a multi-activity package before the group commits, including venue costs, transport, and extras.
 
-### Build Packages
-Combine multiple activities into a full-day or weekend itinerary package. AI sequences them logically (brunch → afternoon activity → dinner) with travel time estimates between stops.
+### Booking inside the app
+Reserve and pay for everything without leaving PlanPal, via direct integrations with OpenTable, Eventbrite, Airbnb Experiences, and others.
 
-### Find Package Costs
-Get a total cost estimate for a multi-activity package — including venue prices, transport, and optional extras — so the group knows the full spend before committing.
+### Vendor marketplace
+Local restaurants, activity operators, and experience providers can list group packages and exclusive discounts for PlanPal users.
 
-### One-Stop Payment
-Connect directly with venue booking APIs (OpenTable, Eventbrite, Airbnb Experiences, etc.) so the group can reserve and pay for everything inside PlanPal. No jumping between apps, no "can someone book this?" back-and-forth.
-
-### Vendor Network
-A curated marketplace of local vendors — restaurants, activity operators, experience providers — who offer group packages and exclusive discounts to PlanPal users.
-
-### Smart Notifications
-Remind members to vote, alert the group when a recommendation sells out, and send a "time to plan again" nudge when the group hasn't met in a while.
+### Smart nudges
+Reminders to vote, alerts when a recommendation sells out, and a gentle ping when the group is overdue for a catch-up.

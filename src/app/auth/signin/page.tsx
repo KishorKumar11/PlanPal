@@ -13,11 +13,8 @@ export default function SignInPage() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(124,58,237,0.15)_0%,_transparent_60%)]" />
 
       <div className="relative w-full max-w-sm">
-        <div className="text-center mb-8">
-          <h1 className="font-display text-5xl font-bold gradient-text mb-3">PlanPal</h1>
-          <p className="text-text-dim text-sm leading-relaxed">
-            Find your archetype. Plan with friends.
-          </p>
+        <div className="flex justify-center mb-8">
+          <PlanPalLogo size="lg" showSlogan />
         </div>
 
         <GlowCard className="p-8">

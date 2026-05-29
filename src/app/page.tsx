@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import { Brain, Users, Sparkles, ArrowRight, Zap, Star } from "lucide-react";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
@@ -66,11 +65,10 @@ const activityPhotos = [
 
 export default async function LandingPage() {
   const session = await auth();
-  if (session?.user?.id) redirect("/dashboard");
 
   return (
     <>
-      <Navbar user={null} />
+      <Navbar user={session?.user ?? null} />
       <main className="min-h-screen overflow-hidden">
 
         {/* ── Background blobs (parallax, slowest layer) ────── */}
@@ -280,7 +278,7 @@ export default async function LandingPage() {
               {archetypes.map((archetype, i) => (
                 <AnimatedSection key={archetype.id} delay={i * 0.07}>
                   <div
-                    className="rounded-2xl border border-white/10 p-5 text-center hover:border-white/25 hover:-translate-y-1.5 transition-all duration-300 cursor-default h-full"
+                    className="rounded-2xl border border-white/10 p-5 text-center hover:border-white/25 hover:-translate-y-1.5 transition-all duration-300 cursor-pointer h-full"
                     style={{ background: `${archetype.color}0d` }}
                   >
                     <div

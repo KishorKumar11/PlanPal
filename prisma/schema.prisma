@@ -8,9 +8,9 @@ datasource db {
 }
 
 model User {
-  id              String    @id @default(cuid())
+  id              String        @id @default(cuid())
   name            String?
-  email           String    @unique
+  email           String        @unique
   emailVerified   DateTime?
   image           String?
   mbtiType        String?
@@ -19,13 +19,12 @@ model User {
   interests       String[]
   quizCompletedAt DateTime?
   quizUpdatedAt   DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  accounts    Account[]
-  sessions    Session[]
-  memberships GroupMember[]
-  votes       Vote[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  accounts        Account[]
+  memberships     GroupMember[]
+  sessions        Session[]
+  votes           Vote[]
 }
 
 model Account {
@@ -55,53 +54,49 @@ model Session {
 }
 
 model VibeGroup {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  inviteCode  String   @unique @default(cuid())
-  createdById String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
+  id              String           @id @default(cuid())
+  name            String
+  description     String?
+  inviteCode      String           @unique @default(cuid())
+  createdById     String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
   members         GroupMember[]
   recommendations Recommendation[]
 }
 
 model GroupMember {
-  id       String   @id @default(cuid())
+  id       String    @id @default(cuid())
   groupId  String
   userId   String
-  role     String   @default("member")
-  joinedAt DateTime @default(now())
-
-  group VibeGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  user  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role     String    @default("member")
+  joinedAt DateTime  @default(now())
+  group    VibeGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([groupId, userId])
 }
 
 model Recommendation {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   groupId     String
   title       String
   description String
   category    String
   reasoning   String
   metadata    Json?
-  createdAt   DateTime @default(now())
-
-  group VibeGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  votes Vote[]
+  createdAt   DateTime  @default(now())
+  group       VibeGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  votes       Vote[]
 }
 
 model Vote {
-  id               String @id @default(cuid())
+  id               String         @id @default(cuid())
   recommendationId String
   userId           String
   value            Int
-
-  recommendation Recommendation @relation(fields: [recommendationId], references: [id], onDelete: Cascade)
-  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recommendation   Recommendation @relation(fields: [recommendationId], references: [id], onDelete: Cascade)
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([recommendationId, userId])
 }

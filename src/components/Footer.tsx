@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Compass, Globe, X, Mail } from "lucide-react";
+import { Globe, X, Mail } from "lucide-react";
+import PlanPalLogo from "./PlanPalLogo";
 
 const links = {
   product: [
@@ -34,11 +35,8 @@ export default function Footer() {
 
           {/* Brand column */}
           <div className="lg:col-span-2">
-            <Link href="/" className="inline-flex items-center gap-2 mb-4 group">
-              <div className="w-8 h-8 rounded-xl bg-violet/20 flex items-center justify-center group-hover:bg-violet/30 transition-colors duration-200">
-                <Compass size={16} className="text-violet" />
-              </div>
-              <span className="font-display text-xl font-bold gradient-text">PlanPal</span>
+            <Link href="/" className="inline-block mb-4">
+              <PlanPalLogo size="sm" />
             </Link>
             <p className="text-text-dim text-sm leading-relaxed max-w-xs">
               No more "what should we do?" back-and-forth. PlanPal analyses everyone&apos;s personalities and finds activities your whole group will love.

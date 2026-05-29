@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { quizQuestions } from "@/lib/quiz-data";
 import { Archetype } from "@/lib/archetypes";
@@ -23,6 +23,11 @@ export default function QuizPage() {
   const [state, setState] = useState<QuizState>("quiz");
   const [result, setResult] = useState<{ archetype: Archetype; traitScores: TraitScores } | null>(null);
   const [loadingMsg, setLoadingMsg] = useState("");
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  useEffect(() => {
+    setIsTransitioning(false);
+  }, [currentIdx, state]);
 
   const loadingMessages = [
     "Analysing your vibes…",
@@ -32,6 +37,8 @@ export default function QuizPage() {
   ];
 
   const handleAnswer = async (optionIndex: number) => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
     const answer: Answer = { questionId: quizQuestions[currentIdx].id, optionIndex };
     const newAnswers = [...answers, answer];
     setAnswers(newAnswers);
@@ -102,11 +109,13 @@ export default function QuizPage() {
           <QuizProgress current={currentIdx + 1} total={quizQuestions.length} />
         </div>
 
-        <QuizQuestion
-          question={quizQuestions[currentIdx]}
-          questionIndex={currentIdx}
-          onAnswer={handleAnswer}
-        />
+        {quizQuestions[currentIdx] && (
+          <QuizQuestion
+            question={quizQuestions[currentIdx]}
+            questionIndex={currentIdx}
+            onAnswer={handleAnswer}
+          />
+        )}
       </div>
     </main>
   );
