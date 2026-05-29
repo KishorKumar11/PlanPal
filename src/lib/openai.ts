@@ -69,11 +69,13 @@ Suggest 5 activities for this group. Return JSON array only.`;
     max_tokens: 1500,
   });
 
-  const text = response.choices[0]?.message?.content ?? "[]";
-  const cleaned = text.replace(/```json|```/g, "").trim();
+  const text = response.choices[0]?.message?.content ?? "";
+  // Extract the JSON array even if the model adds prose or markdown around it
+  const match = text.match(/\[[\s\S]*\]/);
+  if (!match) return [];
 
   try {
-    return JSON.parse(cleaned) as AIRecommendation[];
+    return JSON.parse(match[0]) as AIRecommendation[];
   } catch {
     return [];
   }
