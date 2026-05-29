@@ -52,7 +52,6 @@ export default function RecommendationCard({
       transition={{ delay: index * 0.08, duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
       <GlowCard className="p-5 h-full flex flex-col">
-        {/* Header */}
         <div className="flex items-start gap-3 mb-3">
           <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
             {categoryIcon[rec.category] ?? <Target size={18} />}
@@ -65,12 +64,10 @@ export default function RecommendationCard({
           </div>
         </div>
 
-        {/* Description */}
         <p className="text-text-bright/75 text-sm leading-relaxed mb-4 flex-1">
           {rec.description}
         </p>
 
-        {/* Metadata pills */}
         {meta && (
           <div className="flex flex-wrap gap-2 mb-4">
             <span className="text-xs border border-white/15 bg-white/5 text-text-dim rounded-full px-3 py-1 font-medium">
@@ -90,7 +87,6 @@ export default function RecommendationCard({
           </div>
         )}
 
-        {/* Why this fits toggle */}
         <button
           onClick={() => setShowReason((r) => !r)}
           className="flex items-center gap-1.5 text-xs text-text-dim hover:text-text-bright transition-colors mb-2 group"
@@ -118,7 +114,6 @@ export default function RecommendationCard({
           )}
         </AnimatePresence>
 
-        {/* Votes */}
         {onVote && (
           <div className="flex items-center gap-2 pt-3 border-t border-white/10 mt-auto">
             <motion.button

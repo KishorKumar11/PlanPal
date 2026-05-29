@@ -33,7 +33,6 @@ export default function PlanPage({
   const [notesSaved, setNotesSaved] = useState(false);
   const [marking, setMarking] = useState(false);
 
-  // Event-driven refetch (grid submit, date override) — called from handlers.
   const reload = useCallback(async () => {
     const g = await fetch(`/api/groups/${id}`).then((r) =>
       r.ok ? r.json() : null
@@ -42,7 +41,6 @@ export default function PlanPage({
     setNotes(g?.planNotes ?? "");
   }, [id]);
 
-  // Initial load.
   useEffect(() => {
     let active = true;
     Promise.all([
@@ -173,7 +171,6 @@ export default function PlanPage({
           </div>
         )}
 
-        {/* Date coordination */}
         <div className="mb-6">
           <p className="text-xs text-text-dim uppercase tracking-widest mb-3">
             Pick a date
@@ -191,7 +188,6 @@ export default function PlanPage({
           />
         </div>
 
-        {/* Notes */}
         <div className="mb-6">
           <p className="text-xs text-text-dim uppercase tracking-widest mb-3 flex items-center gap-1.5">
             <StickyNote size={12} /> Notes
@@ -221,7 +217,6 @@ export default function PlanPage({
           </div>
         </div>
 
-        {/* Share + done */}
         <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-white/10">
           <SharePlanCard
             groupName={group.name}

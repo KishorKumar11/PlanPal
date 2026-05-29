@@ -33,7 +33,6 @@ export default function VotePage({
       setRecs(g?.recommendations ?? []);
       setUserId(s?.user?.id);
       setLoading(false);
-      // Already locked when we arrive → straight to the plan.
       if (g?.planStatus === "locked") router.replace(`/group/${id}/plan`);
     });
     return () => {
@@ -58,7 +57,6 @@ export default function VotePage({
       )
     );
 
-    // Last vote landed — celebrate, then hand off to the plan page.
     if (data.planStatus === "locked") {
       setJustLocked(true);
       setTimeout(() => router.push(`/group/${id}/plan`), 1900);
@@ -71,7 +69,6 @@ export default function VotePage({
       a.votes.reduce((s, v) => s + v.value, 0)
   );
 
-  // Who still needs to vote?
   const voters = new Set<string>();
   for (const r of recs) for (const v of r.votes) voters.add(v.userId);
   const members = group?.members ?? [];
@@ -96,7 +93,6 @@ export default function VotePage({
           </p>
         </div>
 
-        {/* Waiting bar */}
         {!loading && recs.length > 0 && members.length > 0 && (
           <div className="mb-6 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
             <div className="flex items-center justify-between gap-3 flex-wrap">

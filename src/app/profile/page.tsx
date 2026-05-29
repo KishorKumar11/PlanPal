@@ -53,13 +53,13 @@ export default async function ProfilePage() {
             <div className="mb-8">
               <p className="text-xs text-text-dim uppercase tracking-widest mb-4">Personality type</p>
               <div
-                className="rounded-2xl border p-5 flex items-center justify-between"
+                className="rounded-2xl border p-5 flex flex-wrap items-center justify-between gap-4"
                 style={{
                   borderColor: `${MBTI_GROUP_COLORS[mbtiType.group]}30`,
                   background: `${MBTI_GROUP_COLORS[mbtiType.group]}0a`,
                 }}
               >
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 min-w-0">
                   <span
                     className="font-display text-3xl font-bold"
                     style={{ color: MBTI_GROUP_COLORS[mbtiType.group] }}

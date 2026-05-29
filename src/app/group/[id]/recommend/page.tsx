@@ -29,7 +29,6 @@ export default function RecommendPage({
   const [error, setError] = useState("");
   const [userId, setUserId] = useState<string | undefined>();
 
-  // Load any existing (current-batch) recommendations so they persist across visits.
   useEffect(() => {
     let active = true;
     Promise.all([

@@ -64,7 +64,6 @@ export default async function GroupDetailPage({
   const isMember = group.members.some((m) => m.userId === session.user.id);
   if (!isMember) redirect("/dashboard");
 
-  // Current user's onboarding state — used to nudge incomplete profiles.
   const me = await prisma.user.findUnique({
     where: { id: session.user.id },
     select: { mbtiType: true, quizCompletedAt: true },
@@ -213,7 +212,6 @@ export default async function GroupDetailPage({
 
           <PastPlans plans={pastPlans} />
 
-          {/* Plan-state-aware primary action */}
           {group.planStatus === "locked" ? (
             <Link
               href={`/group/${id}/plan`}

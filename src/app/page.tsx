@@ -41,7 +41,6 @@ const steps = [
   },
 ];
 
-// Curated Unsplash photos — best-in-class activity shots
 const activityPhotos = [
   {
     id: "photo-1414235077428-338989a2e8c0",
@@ -91,7 +90,6 @@ export default async function LandingPage() {
         <section className="relative pt-32 pb-20 px-4 text-center">
           <div className="mx-auto max-w-4xl">
 
-            {/* Badge + heading + paragraph — subtle parallax */}
             <ParallaxDiv speed={0.08}>
               <div className="animate-in inline-flex items-center gap-2 rounded-full border border-violet/30 bg-violet/10 px-4 py-1.5 text-xs text-text-dim mb-8 backdrop-blur-sm">
                 <span className="w-1.5 h-1.5 rounded-full bg-violet animate-pulse" />
@@ -151,7 +149,6 @@ export default async function LandingPage() {
                   <span className="text-xs text-text-dim ml-1">Loved by your whole group</span>
                 </div>
               </div>
-              {/* Glow beneath card */}
               <div className="absolute inset-x-8 -bottom-4 h-8 bg-violet/30 blur-xl rounded-full -z-10" />
             </ParallaxDiv>
           </div>
@@ -246,9 +243,7 @@ export default async function LandingPage() {
                       className="object-cover transition-transform duration-700 group-hover:scale-105"
                       sizes="(max-width: 640px) 100vw, 33vw"
                     />
-                    {/* Gradient overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                    {/* Label */}
                     <div className="absolute bottom-4 left-4 right-4">
                       <span
                         className="inline-block text-sm font-display font-semibold text-white px-3 py-1 rounded-full backdrop-blur-sm"
@@ -304,7 +299,7 @@ export default async function LandingPage() {
         {/* ── CTA ───────────────────────────────────────────── */}
         <section className="py-24 px-4 text-center">
           <AnimatedSection className="mx-auto max-w-xl">
-            <div className="relative rounded-3xl border border-white/10 bg-white/5 backdrop-blur-sm p-12 overflow-hidden">
+            <div className="relative rounded-3xl border border-white/10 bg-white/5 backdrop-blur-sm p-8 sm:p-12 overflow-hidden">
               {/* Subtle glow inside */}
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(124,58,237,0.12)_0%,_transparent_70%)] pointer-events-none" />
 
