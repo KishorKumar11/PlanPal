@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Sparkles } from "lucide-react";
 import { RecommendationWithVotes } from "@/lib/types";
 import RecommendationCard from "@/components/RecommendationCard";
 
@@ -23,20 +24,35 @@ export default function RecommendPage({
   const router = useRouter();
   const [recs, setRecs] = useState<RecommendationWithVotes[]>([]);
   const [loading, setLoading] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
   const [msgIdx, setMsgIdx] = useState(0);
   const [error, setError] = useState("");
   const [userId, setUserId] = useState<string | undefined>();
 
+  // Load any existing (current-batch) recommendations so they persist across visits.
   useEffect(() => {
-    fetch("/api/auth/session")
-      .then((r) => r.json())
-      .then((s) => setUserId(s?.user?.id));
-  }, []);
+    let active = true;
+    Promise.all([
+      fetch(`/api/groups/${id}`).then((r) => (r.ok ? r.json() : null)),
+      fetch("/api/auth/session").then((r) => r.json()),
+    ]).then(([g, s]) => {
+      if (!active) return;
+      setUserId(s?.user?.id);
+      if (g?.planStatus === "locked") {
+        router.replace(`/group/${id}/plan`);
+        return;
+      }
+      setRecs(g?.recommendations ?? []);
+      setInitialLoad(false);
+    });
+    return () => {
+      active = false;
+    };
+  }, [id, router]);
 
   const generate = async () => {
     setLoading(true);
     setError("");
-    setRecs([]);
 
     let i = 0;
     const interval = setInterval(() => {
@@ -54,8 +70,19 @@ export default function RecommendPage({
       return;
     }
 
-    const data = await res.json();
-    setRecs(data);
+    setRecs(await res.json());
+  };
+
+  const regenerate = () => {
+    const hasVotes = recs.some((r) => r.votes.length > 0);
+    if (
+      hasVotes &&
+      !confirm(
+        "Regenerating replaces these ideas and clears the current votes. Continue?"
+      )
+    )
+      return;
+    generate();
   };
 
   const handleVote = async (recommendationId: string, value: 1 | -1) => {
@@ -65,20 +92,15 @@ export default function RecommendPage({
       body: JSON.stringify({ recommendationId, value }),
     });
     if (!res.ok) return;
-    const vote = await res.json();
+    const data = await res.json();
     setRecs((prev) =>
       prev.map((r) =>
         r.id === recommendationId
-          ? {
-              ...r,
-              votes: [
-                ...r.votes.filter((v) => v.userId !== userId),
-                vote,
-              ],
-            }
+          ? { ...r, votes: [...r.votes.filter((v) => v.userId !== userId), data.vote] }
           : r
       )
     );
+    if (data.planStatus === "locked") router.push(`/group/${id}/plan`);
   };
 
   return (
@@ -99,9 +121,9 @@ export default function RecommendPage({
           </p>
         </div>
 
-        {!loading && recs.length === 0 && (
+        {!initialLoad && !loading && recs.length === 0 && (
           <div className="text-center py-16 rounded-2xl border border-white/10 bg-white/5 mb-8">
-            <p className="text-5xl mb-4">🎯</p>
+            <Sparkles size={36} className="mx-auto mb-4 text-violet" />
             <h2 className="font-display text-xl font-semibold text-text-bright mb-2">
               Ready when you are
             </h2>
@@ -110,9 +132,9 @@ export default function RecommendPage({
             </p>
             <button
               onClick={generate}
-              className="rounded-full bg-gradient-vibe px-8 py-3 font-semibold text-white hover:opacity-90 transition-opacity"
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-vibe px-8 py-3 font-semibold text-white hover:opacity-90 transition-opacity"
             >
-              Generate Recommendations ✨
+              Generate Recommendations <Sparkles size={16} />
             </button>
           </div>
         )}
@@ -130,9 +152,9 @@ export default function RecommendPage({
           </div>
         )}
 
-        {recs.length > 0 && (
+        {!loading && recs.length > 0 && (
           <>
-            <div className="grid grid-cols-1 gap-4 mb-8">
+            <div className="grid grid-cols-1 gap-4 mb-6">
               {recs.map((r, i) => (
                 <RecommendationCard
                   key={r.id}
@@ -143,9 +165,15 @@ export default function RecommendPage({
                 />
               ))}
             </div>
-            <div className="text-center">
+            <div className="flex items-center justify-center gap-3">
+              <Link
+                href={`/group/${id}/vote`}
+                className="rounded-full bg-gradient-vibe px-6 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-opacity"
+              >
+                Go vote →
+              </Link>
               <button
-                onClick={generate}
+                onClick={regenerate}
                 disabled={loading}
                 className="rounded-full border border-white/20 px-6 py-2.5 text-sm text-text-dim hover:border-violet/40 hover:text-text-bright transition-all"
               >

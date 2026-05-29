@@ -88,6 +88,14 @@ export async function POST(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  // A locked plan must be marked done before a new round can be generated.
+  if (group.planStatus === "locked") {
+    return NextResponse.json(
+      { error: "Mark the current plan as done before generating new ideas." },
+      { status: 409 }
+    );
+  }
+
   // ── 3. Check per-group daily limit ────────────────────────────────────────
   const groupRecsToday = group.recommendations.length;
   const remaining = MAX_RECS_PER_GROUP_PER_DAY - groupRecsToday;
@@ -177,11 +185,17 @@ export async function POST(
   }
 
   // ── 6. Persist & respond ──────────────────────────────────────────────────
-  const saved = await prisma.$transaction(
-    aiRecs.map((r) =>
+  // Tag this generation as a batch and make it the active one. Previous batches
+  // (and their votes) are retained for the daily rate-limit count but are no
+  // longer "current", which cleanly resets the voting round.
+  const batchId = crypto.randomUUID();
+
+  const saved = await prisma.$transaction([
+    ...aiRecs.map((r) =>
       prisma.recommendation.create({
         data: {
           groupId: id,
+          batchId,
           title: r.title,
           description: r.description,
           category: r.category,
@@ -194,10 +208,21 @@ export async function POST(
         },
         include: { votes: true },
       })
-    )
-  );
+    ),
+    prisma.vibeGroup.update({
+      where: { id },
+      data: {
+        currentRecBatchId: batchId,
+        planStatus: "idle",
+        lockedRecommendationId: null,
+      },
+    }),
+  ]);
 
-  return NextResponse.json(saved, {
+  // Drop the trailing group-update result; respond with just the new cards.
+  const recs = saved.slice(0, aiRecs.length);
+
+  return NextResponse.json(recs, {
     headers: {
       "X-RateLimit-Limit": String(MAX_RECS_PER_GROUP_PER_DAY),
       "X-RateLimit-Remaining": String(remaining - 1),

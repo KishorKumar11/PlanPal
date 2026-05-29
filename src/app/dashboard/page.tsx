@@ -29,9 +29,13 @@ export default async function DashboardPage() {
 
   const groups = await prisma.vibeGroup.findMany({
     where: { members: { some: { userId: session.user.id } } },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      planStatus: true,
       members: {
-        include: {
+        select: {
           user: { select: { id: true, name: true, image: true, archetype: true } },
         },
       },
@@ -62,6 +66,9 @@ export default async function DashboardPage() {
                     <h2 className="font-display text-lg font-bold" style={{ color: archetype.color }}>
                       {archetype.name}
                     </h2>
+                    <p className="text-text-dim text-xs mt-0.5 max-w-md">
+                      We blend this with your group&apos;s archetypes to pick activities everyone enjoys.
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">

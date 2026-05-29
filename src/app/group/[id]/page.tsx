@@ -3,13 +3,14 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { TraitScores } from "@/lib/types";
+import { TraitScores, PastPlan } from "@/lib/types";
 import Navbar from "@/components/Navbar";
 import MemberList from "@/components/MemberList";
 import CompatibilityScore from "@/components/CompatibilityScore";
 import PersonalityRadar from "@/components/PersonalityRadar";
 import GlowCard from "@/components/GlowCard";
-import PageWrapper from "@/components/PageWrapper";
+import PastPlans from "@/components/PastPlans";
+import { Trophy, CalendarDays, Vote, Sparkles, AlertCircle } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Group — PlanPal",
@@ -18,13 +19,16 @@ import CopyInviteButton from "./CopyInviteButton";
 
 export default async function GroupDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ welcome?: string }>;
 }) {
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/signin");
 
   const { id } = await params;
+  const { welcome } = await searchParams;
 
   const group = await prisma.vibeGroup.findUnique({
     where: { id },
@@ -51,6 +55,7 @@ export default async function GroupDetailPage({
         orderBy: { createdAt: "desc" },
         take: 5,
       },
+      plans: { orderBy: { completedAt: "desc" } },
     },
   });
 
@@ -58,6 +63,42 @@ export default async function GroupDetailPage({
 
   const isMember = group.members.some((m) => m.userId === session.user.id);
   if (!isMember) redirect("/dashboard");
+
+  // Current user's onboarding state — used to nudge incomplete profiles.
+  const me = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { mbtiType: true, quizCompletedAt: true },
+  });
+  const profileIncomplete = !me?.mbtiType || !me?.quizCompletedAt;
+
+  const lockedRec =
+    group.planStatus === "locked" && group.lockedRecommendationId
+      ? await prisma.recommendation.findUnique({
+          where: { id: group.lockedRecommendationId },
+          select: { title: true, category: true },
+        })
+      : null;
+
+  const pastPlans: PastPlan[] = group.plans.map((p) => ({
+    id: p.id,
+    title: p.title,
+    category: p.category,
+    description: p.description,
+    reasoning: p.reasoning,
+    metadata: p.metadata as unknown as PastPlan["metadata"],
+    lockedDate: p.lockedDate ? p.lockedDate.toISOString() : null,
+    notes: p.notes,
+    completedAt: p.completedAt.toISOString(),
+  }));
+
+  const lockedDateLabel = group.lockedDate
+    ? group.lockedDate.toLocaleDateString(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        timeZone: "UTC",
+      })
+    : null;
 
   const members = group.members.map((m) => ({
     ...m,
@@ -115,6 +156,25 @@ export default async function GroupDetailPage({
             <CopyInviteButton inviteUrl={inviteUrl} />
           </div>
 
+          {welcome && (
+            <div className="mb-6 rounded-xl border border-violet/30 bg-violet/10 p-4 text-sm text-text-bright">
+              You&apos;re in! Take the quiz so your personality shapes this group&apos;s recommendations.
+            </div>
+          )}
+
+          {profileIncomplete && (
+            <Link
+              href="/onboarding/mbti"
+              className="mb-6 flex items-center gap-3 rounded-xl border border-orange/30 bg-orange/10 p-4 text-sm text-text-bright hover:border-orange/50 transition-colors"
+            >
+              <AlertCircle size={18} className="text-orange shrink-0" />
+              <span>
+                Complete your profile to improve this group&apos;s recommendations.
+                <span className="text-orange font-semibold"> Finish setup →</span>
+              </span>
+            </Link>
+          )}
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             <GlowCard className="p-6 flex flex-col items-center justify-center">
               <CompatibilityScore members={members} />
@@ -151,12 +211,47 @@ export default async function GroupDetailPage({
             <MemberList members={members} createdById={group.createdById} />
           </div>
 
-          <Link
-            href={`/group/${id}/recommend`}
-            className="block w-full text-center rounded-full bg-gradient-vibe py-4 font-display text-lg font-bold text-white hover:opacity-90 transition-opacity"
-          >
-            ✨ Get AI Recommendations →
-          </Link>
+          <PastPlans plans={pastPlans} />
+
+          {/* Plan-state-aware primary action */}
+          {group.planStatus === "locked" ? (
+            <Link
+              href={`/group/${id}/plan`}
+              className="block rounded-2xl border border-teal-400/30 bg-teal-400/10 p-5 hover:border-teal-400/50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-teal-400/15 border border-teal-400/30 flex items-center justify-center shrink-0">
+                  <Trophy size={20} className="text-teal-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-teal-400 uppercase tracking-widest">Our plan</p>
+                  <p className="font-display text-lg font-bold text-text-bright truncate">
+                    {lockedRec?.title ?? "Locked in"}
+                  </p>
+                  {lockedDateLabel && (
+                    <p className="text-xs text-text-dim flex items-center gap-1 mt-0.5">
+                      <CalendarDays size={11} /> {lockedDateLabel}
+                    </p>
+                  )}
+                </div>
+                <span className="text-sm text-teal-400 font-semibold shrink-0">View →</span>
+              </div>
+            </Link>
+          ) : group.planStatus === "voting" ? (
+            <Link
+              href={`/group/${id}/vote`}
+              className="flex items-center justify-center gap-2 w-full rounded-full bg-gradient-vibe py-4 font-display text-lg font-bold text-white hover:opacity-90 transition-opacity"
+            >
+              <Vote size={20} /> Voting in progress — cast yours →
+            </Link>
+          ) : (
+            <Link
+              href={`/group/${id}/recommend`}
+              className="flex items-center justify-center gap-2 w-full rounded-full bg-gradient-vibe py-4 font-display text-lg font-bold text-white hover:opacity-90 transition-opacity"
+            >
+              <Sparkles size={20} /> Get AI Recommendations →
+            </Link>
+          )}
         </div>
       </main>
     </>

@@ -25,6 +25,7 @@ model User {
   memberships     GroupMember[]
   sessions        Session[]
   votes           Vote[]
+  availabilities  Availability[]
 }
 
 model Account {
@@ -53,33 +54,75 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+enum PlanStatus {
+  idle
+  voting
+  locked
+}
+
 model VibeGroup {
-  id              String           @id @default(cuid())
-  name            String
-  description     String?
-  inviteCode      String           @unique @default(cuid())
-  createdById     String
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  members         GroupMember[]
-  recommendations Recommendation[]
+  id                     String           @id @default(cuid())
+  name                   String
+  description            String?
+  inviteCode             String           @unique @default(cuid())
+  createdById            String
+  planStatus             PlanStatus       @default(idle)
+  lockedRecommendationId String?
+  currentRecBatchId      String?
+  dateWindowStart        DateTime?
+  dateWindowEnd          DateTime?
+  lockedDate             DateTime?
+  planNotes              String?
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+  members                GroupMember[]
+  recommendations        Recommendation[]
+  availabilities         Availability[]
+  plans                  Plan[]
 }
 
 model GroupMember {
-  id       String    @id @default(cuid())
-  groupId  String
-  userId   String
-  role     String    @default("member")
-  joinedAt DateTime  @default(now())
-  group    VibeGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                    String    @id @default(cuid())
+  groupId               String
+  userId                String
+  role                  String    @default("member")
+  joinedAt              DateTime  @default(now())
+  availabilitySubmittedAt DateTime?
+  group                 VibeGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([groupId, userId])
+}
+
+model Availability {
+  id      String    @id @default(cuid())
+  groupId String
+  userId  String
+  date    DateTime
+  group   VibeGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId, date])
+}
+
+model Plan {
+  id          String    @id @default(cuid())
+  groupId     String
+  title       String
+  category    String
+  description String
+  reasoning   String
+  metadata    Json?
+  lockedDate  DateTime?
+  notes       String?
+  completedAt DateTime  @default(now())
+  group       VibeGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
 }
 
 model Recommendation {
   id          String    @id @default(cuid())
   groupId     String
+  batchId     String?
   title       String
   description String
   category    String

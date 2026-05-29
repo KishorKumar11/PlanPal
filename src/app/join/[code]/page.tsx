@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { SearchX } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import GlowCard from "@/components/GlowCard";
@@ -41,7 +42,7 @@ export default async function JoinGroupPage({
     return (
       <main className="min-h-screen flex items-center justify-center px-4">
         <div className="text-center">
-          <p className="text-5xl mb-4">🔍</p>
+          <SearchX size={44} className="mx-auto mb-4 text-text-dim" />
           <h1 className="font-display text-2xl font-bold text-text-bright mb-2">Group not found</h1>
           <p className="text-text-dim mb-6">This invite link may be invalid or expired.</p>
           <Link href="/dashboard" className="text-violet hover:underline text-sm">Go to dashboard</Link>
@@ -84,8 +85,23 @@ export default async function JoinGroupPage({
         <form
           action={async () => {
             "use server";
-            await fetch(`/api/groups/${group.id}/join`, { method: "POST" });
-            redirect(`/group/${group.id}`);
+            const inner = await auth();
+            if (!inner?.user?.id) redirect("/auth/signin");
+            await prisma.groupMember.upsert({
+              where: { groupId_userId: { groupId: group.id, userId: inner.user.id } },
+              update: {},
+              create: { groupId: group.id, userId: inner.user.id },
+            });
+            const u = await prisma.user.findUnique({
+              where: { id: inner.user.id },
+              select: { mbtiType: true, quizCompletedAt: true },
+            });
+            // Send un-onboarded joiners through setup first; everyone else lands
+            // on the group with a welcome nudge.
+            if (!u?.mbtiType || !u?.quizCompletedAt) {
+              redirect("/onboarding/mbti");
+            }
+            redirect(`/group/${group.id}?welcome=1`);
           }}
         >
           <button

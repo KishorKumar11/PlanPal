@@ -24,6 +24,7 @@ export default function MemberList({ members, createdById }: MemberListProps) {
           ? getMbtiType(member.user.mbtiType)
           : null;
         const isAdmin = member.userId === createdById;
+        const incomplete = !archetype && !mbtiType;
 
         return (
           <motion.div
@@ -32,7 +33,11 @@ export default function MemberList({ members, createdById }: MemberListProps) {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-40px" }}
             transition={{ delay: i * 0.06, duration: 0.3, ease: "easeOut" }}
-            className="flex items-center gap-4 rounded-xl border border-white/10 bg-white/5 p-4 hover:border-white/20 transition-colors duration-200"
+            className={`flex items-center gap-4 rounded-xl border p-4 transition-colors duration-200 ${
+              incomplete
+                ? "border-white/5 bg-white/[0.02] hover:border-white/10"
+                : "border-white/10 bg-white/5 hover:border-white/20"
+            }`}
           >
             {member.user.image ? (
               <Image
@@ -40,10 +45,16 @@ export default function MemberList({ members, createdById }: MemberListProps) {
                 alt={member.user.name ?? "Member"}
                 width={44}
                 height={44}
-                className="rounded-full shrink-0 ring-2 ring-white/10"
+                className={`rounded-full shrink-0 ring-2 ring-white/10 ${
+                  incomplete ? "opacity-40 grayscale" : ""
+                }`}
               />
             ) : (
-              <div className="w-11 h-11 rounded-full bg-violet/30 flex items-center justify-center text-base font-bold text-text-bright shrink-0 ring-2 ring-violet/20">
+              <div
+                className={`w-11 h-11 rounded-full bg-violet/30 flex items-center justify-center text-base font-bold text-text-bright shrink-0 ring-2 ring-violet/20 ${
+                  incomplete ? "opacity-40 grayscale" : ""
+                }`}
+              >
                 {(member.user.name ?? member.user.email)[0].toUpperCase()}
               </div>
             )}
@@ -64,7 +75,9 @@ export default function MemberList({ members, createdById }: MemberListProps) {
                 {archetype ? (
                   <ArchetypeCard archetype={archetype} compact />
                 ) : (
-                  <span className="text-xs text-text-dim">Quiz not completed</span>
+                  <span className="inline-flex items-center gap-1 text-xs text-orange/80 border border-orange/30 bg-orange/10 rounded-full px-2 py-0.5">
+                    Profile incomplete
+                  </span>
                 )}
                 {mbtiType && (
                   <span

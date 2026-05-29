@@ -24,7 +24,27 @@ export interface GroupMemberWithUser {
   userId: string;
   role: string;
   joinedAt: Date;
+  availabilitySubmittedAt: Date | null;
   user: GroupMemberUser;
+}
+
+export type PlanStatus = "idle" | "voting" | "locked";
+
+export interface AvailabilityData {
+  userId: string;
+  date: string; // ISO date (yyyy-mm-dd)
+}
+
+export interface PastPlan {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  reasoning: string;
+  metadata: RecommendationMetadata | null;
+  lockedDate: string | null;
+  notes: string | null;
+  completedAt: string;
 }
 
 export interface RecommendationMetadata {
@@ -43,6 +63,7 @@ export interface VoteData {
 export interface RecommendationWithVotes {
   id: string;
   groupId: string;
+  batchId?: string | null;
   title: string;
   description: string;
   category: string;
@@ -58,7 +79,15 @@ export interface GroupWithMembers {
   description: string | null;
   inviteCode: string;
   createdById: string;
+  planStatus: PlanStatus;
+  lockedRecommendationId: string | null;
+  dateWindowStart: string | null;
+  dateWindowEnd: string | null;
+  lockedDate: string | null;
+  planNotes: string | null;
   createdAt: Date;
   members: GroupMemberWithUser[];
   recommendations: RecommendationWithVotes[];
+  availabilities: AvailabilityData[];
+  plans: PastPlan[];
 }

@@ -25,6 +25,7 @@ export async function GET(
               email: true,
               image: true,
               archetype: true,
+              mbtiType: true,
               traitScores: true,
               interests: true,
             },
@@ -36,6 +37,8 @@ export async function GET(
         include: { votes: true },
         orderBy: { createdAt: "desc" },
       },
+      availabilities: { select: { userId: true, date: true } },
+      plans: { orderBy: { completedAt: "desc" } },
     },
   });
 
@@ -44,5 +47,10 @@ export async function GET(
   const isMember = group.members.some((m) => m.userId === session.user.id);
   if (!isMember) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  return NextResponse.json(group);
+  // Expose only the active batch as votable cards; older batches stay hidden.
+  const recommendations = group.recommendations.filter(
+    (r) => r.batchId === group.currentRecBatchId
+  );
+
+  return NextResponse.json({ ...group, recommendations });
 }

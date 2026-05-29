@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Users, ArrowRight } from "lucide-react";
+import { Users, ArrowRight, Trophy, Vote } from "lucide-react";
 import GlowCard from "./GlowCard";
 
 interface GroupCardMember {
@@ -15,14 +15,35 @@ interface GroupCardProps {
     id: string;
     name: string;
     description: string | null;
+    planStatus?: "idle" | "voting" | "locked";
     members: GroupCardMember[];
   };
   index?: number;
 }
 
+const statusBadge: Record<
+  "voting" | "locked",
+  { label: string; className: string; Icon: typeof Vote }
+> = {
+  voting: {
+    label: "Voting",
+    className: "text-violet border-violet/40 bg-violet/10",
+    Icon: Vote,
+  },
+  locked: {
+    label: "Plan locked",
+    className: "text-teal-400 border-teal-400/40 bg-teal-400/10",
+    Icon: Trophy,
+  },
+};
+
 export default function GroupCard({ group, index = 0 }: GroupCardProps) {
   const router = useRouter();
   const preview = group.members.slice(0, 4);
+  const badge =
+    group.planStatus === "voting" || group.planStatus === "locked"
+      ? statusBadge[group.planStatus]
+      : null;
 
   return (
     <motion.div
@@ -36,10 +57,20 @@ export default function GroupCard({ group, index = 0 }: GroupCardProps) {
           <h3 className="font-display text-lg font-semibold text-text-bright truncate pr-2 group-hover:text-white transition-colors">
             {group.name}
           </h3>
-          <span className="shrink-0 inline-flex items-center gap-1 text-xs text-text-dim border border-white/10 rounded-full px-2.5 py-0.5">
-            <Users size={10} />
-            {group.members.length}
-          </span>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {badge && (
+              <span
+                className={`inline-flex items-center gap-1 text-xs border rounded-full px-2.5 py-0.5 ${badge.className}`}
+              >
+                <badge.Icon size={10} />
+                {badge.label}
+              </span>
+            )}
+            <span className="inline-flex items-center gap-1 text-xs text-text-dim border border-white/10 rounded-full px-2.5 py-0.5">
+              <Users size={10} />
+              {group.members.length}
+            </span>
+          </div>
         </div>
 
         {group.description && (

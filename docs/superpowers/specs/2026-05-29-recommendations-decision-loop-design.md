@@ -22,7 +22,13 @@ When the last group member casts their first vote (thumbs up or down on any reco
 ### Data Model Changes
 Add to `VibeGroup`:
 - `planStatus`: enum `idle | voting | locked` (default `idle`)
-- `lockedRecommendationId`: optional foreign key to `Recommendation`
+- `lockedRecommendationId`: optional reference to a `Recommendation` id
+- `currentRecBatchId`: marks the active generation batch (see note below)
+
+Add to `Recommendation`:
+- `batchId`: the generation batch this card belongs to
+
+**Batch note (implementation refinement):** rather than deleting recommendations on regenerate, each generation is tagged with a `batchId` and the group's `currentRecBatchId` points at the active one. Only the current batch is votable/visible; older rows are retained so the existing 24h rate-limit (which counts recommendation rows) keeps working, and a regenerate cleanly resets the voting round.
 
 `planStatus` transitions:
 - `idle` → `voting`: first vote cast in the group
@@ -70,7 +76,7 @@ Add to `VibeGroup`:
 - The day with the highest count is highlighted as the suggested best date.
 
 ### Auto-Lock
-- When the last member submits their availability, the day with the highest member count auto-locks as `lockedDate`.
+- When the last member submits their availability, the day with the highest member count auto-locks as `lockedDate` (ties break to the earliest date). It never overwrites an already-set date, preserving a creator override.
 - Creator receives a subtle "Date set — tap to change" affordance. Tapping opens the date window picker again; saving a new window resets member availability and restarts the grid.
 
 ### New Data Model: `Availability`
@@ -83,13 +89,15 @@ Add to `VibeGroup`:
 
 One row per free day per user. Replaced wholesale when a user resubmits.
 
+**Submission tracking (implementation refinement):** `GroupMember` gains `availabilitySubmittedAt: DateTime?`. A member is "submitted" once this is set, which lets us distinguish "free on no days" from "hasn't answered" and makes the all-submitted auto-lock check reliable. Cleared when the window changes or the plan is marked done.
+
 ---
 
 ## 4. Plan History
 
 ### "Mark as Done" Action
 - Creator-only button on `/group/[id]/plan`.
-- Sets `planStatus` to `done`, snapshots the current plan into a new `Plan` row, then resets `lockedRecommendationId` and `lockedDate` to null and sets `planStatus` back to `idle`.
+- Snapshots the current plan into a new `Plan` row, then resets `lockedRecommendationId` and `lockedDate` to null and sets `planStatus` to `idle`.
 
 ### History Display
 - On the group page, below the Members section: a collapsible "Past Plans" section.
