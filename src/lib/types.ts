@@ -13,6 +13,7 @@ export interface GroupMemberUser {
   email: string;
   image: string | null;
   archetype: string | null;
+  mbtiType: string | null;
   traitScores: TraitScores | null;
   interests: string[];
 }

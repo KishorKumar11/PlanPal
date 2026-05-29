@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LayoutDashboard, User, LogOut, ChevronDown } from "lucide-react";
+import PlanPalLogo from "./PlanPalLogo";
 
 interface NavbarProps {
   user?: {
@@ -22,8 +23,8 @@ export default function Navbar({ user }: NavbarProps) {
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-cosmos/80 backdrop-blur-md">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          <Link href="/" className="font-display text-2xl font-bold gradient-text">
-            PlanPal
+          <Link href="/">
+            <PlanPalLogo size="sm" />
           </Link>
 
           {user ? (

@@ -38,6 +38,7 @@ export default async function GroupDetailPage({
               email: true,
               image: true,
               archetype: true,
+              mbtiType: true,
               traitScores: true,
               interests: true,
             },

@@ -27,6 +27,7 @@ export default async function JoinGroupPage({
               email: true,
               image: true,
               archetype: true,
+              mbtiType: true,
               traitScores: true,
               interests: true,
             },
@@ -72,6 +73,7 @@ export default async function JoinGroupPage({
               ...m,
               user: {
                 ...m.user,
+                mbtiType: m.user.mbtiType ?? null,
                 traitScores: m.user.traitScores as import("@/lib/types").TraitScores | null,
               },
             }))}

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { quizSubmitSchema } from "@/lib/validators";
 import { calculateTraitScores } from "@/lib/quiz-data";
 import { determineArchetype } from "@/lib/archetypes";
+import { blendMbtiTraits } from "@/lib/mbti";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -17,7 +18,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
 
-  const traitScores = calculateTraitScores(parsed.data.answers);
+  // Base trait scores from quiz answers
+  const quizTraits = calculateTraitScores(parsed.data.answers);
+
+  // Fetch stored MBTI type to blend into trait scores
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { mbtiType: true },
+  });
+
+  // Blend: quiz drives ~75 %, MBTI adjustments refine the rest
+  const traitScores = user?.mbtiType
+    ? blendMbtiTraits(quizTraits, user.mbtiType)
+    : quizTraits;
+
   const archetype = determineArchetype(traitScores);
 
   await prisma.user.update({

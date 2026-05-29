@@ -10,6 +10,7 @@ import { archetypes } from "@/lib/archetypes";
 import ArchetypeIcon from "@/components/ArchetypeIcon";
 import AnimatedSection from "@/components/AnimatedSection";
 import RecommendationCarousel from "@/components/RecommendationCarousel";
+import ParallaxDiv from "@/components/ParallaxDiv";
 
 export const metadata: Metadata = {
   title: "PlanPal — AI Group Activity Planner",
@@ -72,8 +73,8 @@ export default async function LandingPage() {
       <Navbar user={null} />
       <main className="min-h-screen overflow-hidden">
 
-        {/* ── Background blobs ───────────────────────────────── */}
-        <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        {/* ── Background blobs (parallax, slowest layer) ────── */}
+        <ParallaxDiv speed={0.12} className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
           <div
             className="animate-blob animation-delay-0 absolute -top-40 -left-40 w-[600px] h-[600px] opacity-20"
             style={{ background: "radial-gradient(circle, #7c3aed, transparent 70%)" }}
@@ -86,46 +87,48 @@ export default async function LandingPage() {
             className="animate-blob animation-delay-4000 absolute -bottom-40 left-1/3 w-[450px] h-[450px] opacity-10"
             style={{ background: "radial-gradient(circle, #f97316, transparent 70%)" }}
           />
-        </div>
+        </ParallaxDiv>
 
         {/* ── Hero ──────────────────────────────────────────── */}
         <section className="relative pt-32 pb-20 px-4 text-center">
           <div className="mx-auto max-w-4xl">
 
-            {/* Badge */}
-            <div className="animate-in inline-flex items-center gap-2 rounded-full border border-violet/30 bg-violet/10 px-4 py-1.5 text-xs text-text-dim mb-8 backdrop-blur-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-violet animate-pulse" />
-              AI-powered group planning · Free to use
-            </div>
+            {/* Badge + heading + paragraph — subtle parallax */}
+            <ParallaxDiv speed={0.08}>
+              <div className="animate-in inline-flex items-center gap-2 rounded-full border border-violet/30 bg-violet/10 px-4 py-1.5 text-xs text-text-dim mb-8 backdrop-blur-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-violet animate-pulse" />
+                AI-powered group planning · Free to use
+              </div>
 
-            <h1 className="animate-in animation-delay-200 font-display text-5xl sm:text-7xl font-bold leading-tight mb-6">
-              <span className="gradient-text">Stop arguing.</span>
-              <br />
-              <span className="text-text-bright">Start planning.</span>
-            </h1>
+              <h1 className="animate-in animation-delay-200 font-display text-5xl sm:text-7xl font-bold leading-tight mb-6">
+                <span className="gradient-text">Everyone&apos;s happy.</span>
+                <br />
+                <span className="text-text-bright">Every single time.</span>
+              </h1>
 
-            <p className="animate-in animation-delay-300 text-text-dim text-lg sm:text-xl leading-relaxed max-w-xl mx-auto mb-10">
-              PlanPal analyses everyone&apos;s personalities and finds activities your whole group will love — every single time.
-            </p>
+              <p className="animate-in animation-delay-300 text-text-dim text-lg sm:text-xl leading-relaxed max-w-xl mx-auto mb-10">
+                PlanPal analyses everyone&apos;s personalities and finds activities your whole group will love — no compromises needed.
+              </p>
 
-            <div className="animate-in animation-delay-400 flex flex-col sm:flex-row gap-4 justify-center mb-16">
-              <Link
-                href="/auth/signin"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-vibe px-8 py-4 font-display text-lg font-bold text-white hover:opacity-90 active:scale-95 transition-all duration-150 shadow-[0_0_50px_rgba(124,58,237,0.4)]"
-              >
-                Get Started — it&apos;s free
-                <ArrowRight size={18} />
-              </Link>
-              <Link
-                href="#how-it-works"
-                className="rounded-full border border-white/20 px-8 py-4 font-semibold text-text-dim hover:border-white/40 hover:text-text-bright transition-all duration-200"
-              >
-                See how it works
-              </Link>
-            </div>
+              <div className="animate-in animation-delay-400 flex flex-col sm:flex-row gap-4 justify-center mb-16">
+                <Link
+                  href="/auth/signin"
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-vibe px-8 py-4 font-display text-lg font-bold text-white hover:opacity-90 active:scale-95 transition-all duration-150 shadow-[0_0_50px_rgba(124,58,237,0.4)]"
+                >
+                  Get Started — it&apos;s free
+                  <ArrowRight size={18} />
+                </Link>
+                <Link
+                  href="#how-it-works"
+                  className="rounded-full border border-white/20 px-8 py-4 font-semibold text-text-dim hover:border-white/40 hover:text-text-bright transition-all duration-200"
+                >
+                  See how it works
+                </Link>
+              </div>
+            </ParallaxDiv>
 
-            {/* Floating recommendation card mockup */}
-            <div className="animate-in animation-delay-500 relative mx-auto max-w-sm animate-float">
+            {/* Floating card — slightly faster parallax = feels closer */}
+            <ParallaxDiv speed={0.22} className="animate-in animation-delay-500 relative mx-auto max-w-sm animate-float">
               <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-5 text-left shadow-[0_32px_80px_rgba(0,0,0,0.4)]">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-7 h-7 rounded-lg bg-violet/20 flex items-center justify-center">
@@ -152,7 +155,7 @@ export default async function LandingPage() {
               </div>
               {/* Glow beneath card */}
               <div className="absolute inset-x-8 -bottom-4 h-8 bg-violet/30 blur-xl rounded-full -z-10" />
-            </div>
+            </ParallaxDiv>
           </div>
         </section>
 
@@ -308,7 +311,7 @@ export default async function LandingPage() {
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(124,58,237,0.12)_0%,_transparent_70%)] pointer-events-none" />
 
               <h2 className="relative font-display text-3xl sm:text-4xl font-bold text-text-bright mb-4">
-                Ready to stop arguing and start planning?
+                Ready to find something everyone loves?
               </h2>
               <p className="relative text-text-dim mb-8">Free to use. No credit card required. Takes 2 minutes.</p>
               <Link

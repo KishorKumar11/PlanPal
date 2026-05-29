@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ShieldCheck } from "lucide-react";
 import { GroupMemberWithUser } from "@/lib/types";
 import { getArchetypeById } from "@/lib/archetypes";
+import { getMbtiType, MBTI_GROUP_COLORS } from "@/lib/mbti";
 import ArchetypeCard from "./ArchetypeCard";
 
 interface MemberListProps {
@@ -18,6 +19,9 @@ export default function MemberList({ members, createdById }: MemberListProps) {
       {members.map((member, i) => {
         const archetype = member.user.archetype
           ? getArchetypeById(member.user.archetype)
+          : null;
+        const mbtiType = member.user.mbtiType
+          ? getMbtiType(member.user.mbtiType)
           : null;
         const isAdmin = member.userId === createdById;
 
@@ -56,11 +60,25 @@ export default function MemberList({ members, createdById }: MemberListProps) {
                   </span>
                 )}
               </div>
-              {archetype ? (
-                <ArchetypeCard archetype={archetype} compact />
-              ) : (
-                <span className="text-xs text-text-dim">Quiz not completed</span>
-              )}
+              <div className="flex items-center gap-2 flex-wrap">
+                {archetype ? (
+                  <ArchetypeCard archetype={archetype} compact />
+                ) : (
+                  <span className="text-xs text-text-dim">Quiz not completed</span>
+                )}
+                {mbtiType && (
+                  <span
+                    className="text-xs font-bold rounded-full px-2.5 py-0.5"
+                    style={{
+                      color: MBTI_GROUP_COLORS[mbtiType.group],
+                      background: `${MBTI_GROUP_COLORS[mbtiType.group]}18`,
+                      border: `1px solid ${MBTI_GROUP_COLORS[mbtiType.group]}44`,
+                    }}
+                  >
+                    {mbtiType.code}
+                  </span>
+                )}
+              </div>
             </div>
           </motion.div>
         );

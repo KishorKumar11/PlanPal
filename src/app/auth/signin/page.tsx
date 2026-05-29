@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { signIn } from "@/lib/auth";
 import GlowCard from "@/components/GlowCard";
+import PlanPalLogo from "@/components/PlanPalLogo";
 
 export const metadata: Metadata = {
   title: "Sign In — PlanPal",

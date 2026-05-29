@@ -41,7 +41,7 @@ export default function Footer() {
               <span className="font-display text-xl font-bold gradient-text">PlanPal</span>
             </Link>
             <p className="text-text-dim text-sm leading-relaxed max-w-xs">
-              Stop arguing about what to do. PlanPal analyses everyone&apos;s personalities and finds activities your whole group will love.
+              No more "what should we do?" back-and-forth. PlanPal analyses everyone&apos;s personalities and finds activities your whole group will love.
             </p>
 
             {/* Social icons */}
@@ -104,7 +104,7 @@ export default function Footer() {
           <p className="text-xs text-text-dim">
             Made with{" "}
             <span className="text-pink">♥</span>
-            {" "}for groups who can&apos;t agree on anything.
+            {" "}for groups who love great experiences together.
           </p>
         </div>
       </div>

@@ -1,6 +1,6 @@
 # PlanPal — AI Group Activity Planner
 
-Stop arguing about what to do. PlanPal analyses everyone's personalities and finds activities your whole group will love.
+No more "what should we do?" back-and-forth. PlanPal analyses everyone's personalities and finds activities your whole group will love.
 
 ## What it does
 

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getArchetypeById } from "@/lib/archetypes";
+import { getMbtiType, MBTI_GROUP_COLORS } from "@/lib/mbti";
 import { TraitScores } from "@/lib/types";
 import Navbar from "@/components/Navbar";
 import ArchetypeCard from "@/components/ArchetypeCard";
@@ -26,6 +27,7 @@ export default async function ProfilePage() {
       email: true,
       image: true,
       archetype: true,
+      mbtiType: true,
       traitScores: true,
       interests: true,
       quizCompletedAt: true,
@@ -37,6 +39,7 @@ export default async function ProfilePage() {
 
   const archetype = user.archetype ? getArchetypeById(user.archetype) : null;
   const traitScores = user.traitScores as TraitScores | null;
+  const mbtiType = user.mbtiType ? getMbtiType(user.mbtiType) : null;
 
   return (
     <>
@@ -45,6 +48,41 @@ export default async function ProfilePage() {
         <div className="mx-auto max-w-2xl">
           <h1 className="font-display text-3xl font-bold gradient-text mb-8">Your Profile</h1>
 
+          {/* MBTI type */}
+          {mbtiType && (
+            <div className="mb-8">
+              <p className="text-xs text-text-dim uppercase tracking-widest mb-4">Personality type</p>
+              <div
+                className="rounded-2xl border p-5 flex items-center justify-between"
+                style={{
+                  borderColor: `${MBTI_GROUP_COLORS[mbtiType.group]}30`,
+                  background: `${MBTI_GROUP_COLORS[mbtiType.group]}0a`,
+                }}
+              >
+                <div className="flex items-center gap-4">
+                  <span
+                    className="font-display text-3xl font-bold"
+                    style={{ color: MBTI_GROUP_COLORS[mbtiType.group] }}
+                  >
+                    {mbtiType.code}
+                  </span>
+                  <div>
+                    <div className="font-semibold text-text-bright text-sm">{mbtiType.nickname}</div>
+                    <div className="text-xs text-text-dim mt-0.5">{mbtiType.group}</div>
+                    <div className="text-xs text-text-dim mt-0.5 max-w-xs">{mbtiType.tagline}</div>
+                  </div>
+                </div>
+                <Link
+                  href="/onboarding/mbti"
+                  className="text-xs text-text-dim hover:text-text-bright border border-white/10 rounded-full px-3 py-1.5 transition-colors shrink-0"
+                >
+                  Change →
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {/* Archetype */}
           {archetype ? (
             <div className="mb-8">
               <p className="text-xs text-text-dim uppercase tracking-widest mb-4">Your archetype</p>
@@ -75,6 +113,7 @@ export default async function ProfilePage() {
             </div>
           )}
 
+          {/* Trait radar */}
           {traitScores && archetype && (
             <div className="mb-8 rounded-2xl border border-white/10 bg-white/5 p-4">
               <p className="text-xs text-text-dim uppercase tracking-widest mb-2 px-2">Trait profile</p>
@@ -82,6 +121,7 @@ export default async function ProfilePage() {
             </div>
           )}
 
+          {/* Interests */}
           <div className="mb-8">
             <p className="text-xs text-text-dim uppercase tracking-widest mb-4">Your interests</p>
             <EditInterests initial={user.interests} />

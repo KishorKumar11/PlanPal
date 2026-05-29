@@ -21,9 +21,10 @@ export default async function DashboardPage() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { archetype: true, quizCompletedAt: true },
+    select: { archetype: true, mbtiType: true, quizCompletedAt: true },
   });
 
+  if (!user?.mbtiType) redirect("/onboarding/mbti");
   if (!user?.quizCompletedAt) redirect("/onboarding/quiz");
 
   const groups = await prisma.vibeGroup.findMany({

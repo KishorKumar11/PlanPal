@@ -23,8 +23,7 @@ This project uses **non-standard versions** with breaking changes from what you 
 - **JWT sessions** (not database sessions) — avoids type incompatibility between NextAuth v5 and Prisma v7 generated client
 - **`@prisma/adapter-pg`** — Prisma connects via `pg` pool, not the default connector; see `src/lib/prisma.ts`
 - **Prisma client import path** — always `@/generated/prisma/client`, never `@prisma/client`
-- **AI module** — `src/lib/openai.ts` (legacy name, now uses Anthropic). Client is lazy-init **inside** the function — never at module level (breaks Vercel build-time page data collection)
-- **Anthropic prompt caching** — system prompt has `cache_control: { type: "ephemeral" }` to cache after first call
+- **AI module** — `src/lib/openai.ts` (legacy name, now uses Groq via OpenAI-compatible API). Client is lazy-init **inside** the function — never at module level (breaks Vercel build-time page data collection)
 - **`VibeGroup`** — the Prisma model for groups is named `VibeGroup` (not `Group`) to avoid reserved word conflicts
 
 ## Key files
@@ -53,7 +52,7 @@ NEXTAUTH_SECRET        Same value as AUTH_SECRET
 NEXTAUTH_URL           App URL (http://localhost:3000 locally)
 GOOGLE_CLIENT_ID       Google OAuth
 GOOGLE_CLIENT_SECRET   Google OAuth
-ANTHROPIC_API_KEY      Anthropic API key (sk-ant-...)
+GROQ_API_KEY           Groq API key (gsk_...)
 ```
 
 ## Common patterns

@@ -64,6 +64,7 @@ export async function POST(
             select: {
               id: true,
               archetype: true,
+              mbtiType: true,
               traitScores: true,
               interests: true,
             },
@@ -117,6 +118,10 @@ export async function POST(
     .map((m) => m.user.archetype)
     .filter(Boolean) as string[];
 
+  const mbtiTypes = group.members
+    .map((m) => m.user.mbtiType)
+    .filter(Boolean) as string[];
+
   const allInterests = [
     ...new Set(group.members.flatMap((m) => m.user.interests)),
   ];
@@ -158,6 +163,7 @@ export async function POST(
   const aiRecs = await getGroupRecommendations({
     memberCount: group.members.length,
     archetypes,
+    mbtiTypes,
     sharedInterests,
     allInterests,
     avgTraits,

@@ -13,6 +13,7 @@ export interface AIRecommendation {
 interface GroupProfile {
   memberCount: number;
   archetypes: string[];
+  mbtiTypes: string[];
   sharedInterests: string[];
   allInterests: string[];
   avgTraits: Record<string, number>;
@@ -30,9 +31,10 @@ Rules:
 - duration must be one of: "2 hours", "half day", "full day", "weekend"
 - energy_level must be one of: "low", "medium", "high"
 - Mix categories — don't return 5 activities of the same type
-- Tailor recommendations to the specific archetypes and shared interests provided
+- Tailor recommendations to the specific archetypes, MBTI types, and shared interests provided
+- Use MBTI types to understand HOW the group likes to experience things (e.g. Introverts prefer smaller venues, Sensors prefer hands-on activities, Feelers prioritise atmosphere and connection)
 - description: 2-3 sentences on why this is perfect for THIS group specifically
-- reasoning: 1 sentence linking to specific archetypes/interests from the profile`;
+- reasoning: 1 sentence linking to specific archetypes, MBTI preferences, or shared interests from the profile`;
 
 export async function getGroupRecommendations(
   profile: GroupProfile
@@ -43,9 +45,14 @@ export async function getGroupRecommendations(
     baseURL: "https://api.groq.com/openai/v1",
   });
 
+  const mbtiSummary = profile.mbtiTypes.length > 0
+    ? profile.mbtiTypes.join(", ")
+    : "unknown";
+
   const userPrompt = `GROUP PROFILE:
 - Members: ${profile.memberCount}
 - Personality archetypes: ${profile.archetypes.join(", ") || "unknown"}
+- MBTI types: ${mbtiSummary}
 - Shared interests (everyone likes these): ${profile.sharedInterests.join(", ") || "none yet"}
 - All interests across the group: ${profile.allInterests.join(", ") || "none yet"}
 - Group trait scores (1-10 scale): ${JSON.stringify(profile.avgTraits)}
