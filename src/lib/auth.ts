@@ -4,6 +4,11 @@ import { prisma } from "./prisma";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
+  logger: {
+    error(code, ...message) {
+      console.error("[auth][detail]", JSON.stringify(code), ...message);
+    },
+  },
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
